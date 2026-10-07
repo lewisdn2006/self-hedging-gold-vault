@@ -1,5 +1,7 @@
-streamlit
+numpy
 pandas
 matplotlib
-yfinance
+streamlit
 streamlit-autorefresh
+yfinance
+pytest
