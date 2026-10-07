@@ -15,6 +15,12 @@ BUNDLED_CSV = os.path.join(
 )
 
 
+LONG_CSV = os.path.join(
+    os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+    "data", "gold_futures_daily_2000-08-30_to_2026-10-06.csv",
+)
+
+
 def load_prices_csv(path: str = BUNDLED_CSV) -> Prices:
     """Read ``Date,close`` rows. Dates must be strictly increasing and prices positive."""
     points: Prices = []

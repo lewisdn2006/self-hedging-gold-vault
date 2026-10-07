@@ -10,7 +10,7 @@ them and make the code clean, **not** to redesign the hedge. Behaviour is unchan
 - One LMSR market (`BinaryMarket`) is used by the vault, the simulated traders and the betting game. The
   vault used a separate function with the same formula; a test checks they agree.
 - The code is split into modules (`lmsr`, `traders`, `vault`, `backtest`, `data`, `market_game`, `app`,
-  `market_demo`) with 64 tests. The hedge logic no longer needs Streamlit, so it can be run and tested without it.
+  `market_demo`) with 79 tests. The hedge logic no longer needs Streamlit, so it can be run and tested without it.
 
 ## Unchanged on purpose (known weaknesses)
 
@@ -34,3 +34,21 @@ original's seed-0 result).
 | Modal dialogs and all UI logic in the Tkinter file. | The betting logic is in `MarketGame` and tested; the window is a thin shell. |
 | The results of an earlier measurement were pasted into the top of `main.py` as comments. | Moved to `results/measured_results.md`, produced by a script. |
 | Constants, bot logic, hedge rule, backtest and UI all in one file. | One module each. |
+
+## Added after the merge: the weekly-settled backtest
+
+`goldvault/weekly.py`, `goldvault/risk.py` and `scripts/study_windows.py` are new. The original backtest is
+untouched. The new one:
+
+| Original weakness | Now |
+|---|---|
+| Contracts deleted each Monday without checking the outcome. | Settled at the week's last close: pay 1 each if at or below the target. |
+| Market quantities never reset, so the price slid to zero. | The market restarts at 50/50 every Monday. |
+| "CVaR" was the mean absolute bucket return. | `tail_cvar` averages the worst 5% of outcomes. The hedge is sized with the trailing 250-bar 5% CVaR of weekly gold returns. The traders' implied tail CVaR is also available. |
+| One rising-market year. | Every calendar year 2001 to 2025, with an oracle upper bound and a no-hedge baseline. |
+| Weekly target needed gold at a few thousand dollars. | A percentage target (5% below the Monday price). |
+
+A bug found and fixed while building it: the premium was first measured as the change in cash, which is
+wrong when gold is sold to fund a hedge in the same step. The rule now reports its own cost.
+
+Result: the hedge still loses in 25 of 25 years (see the README).

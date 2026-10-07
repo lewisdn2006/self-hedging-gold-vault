@@ -97,7 +97,7 @@ def rule_based_hedge(
     unit_price = max(p_bad + C.HEDGE_SPREAD, 1e-6)
     fee_rate = C.HEDGE_FEE_BPS / 10000.0
     impact_rate = C.HEDGE_IMPACT_BPS / 10000.0
-    units_bought = hedge_fees = hedge_impact = 0.0
+    units_bought = hedge_fees = hedge_impact = cost = 0.0
     if hedge_value >= C.HEDGE_MIN_TRADE_USD and vault.cash > 0:
         max_affordable = vault.cash / (1 + fee_rate + impact_rate)
         spend = min(hedge_value, max_affordable)
@@ -105,7 +105,8 @@ def rule_based_hedge(
         vault.hedge_position += units_bought
         hedge_fees = spend * fee_rate
         hedge_impact = spend * impact_rate
-        vault.cash -= spend + hedge_fees + hedge_impact
+        cost = spend + hedge_fees + hedge_impact
+        vault.cash -= cost
 
     return {
         "hedge_ratio": hedge_ratio,
@@ -117,6 +118,7 @@ def rule_based_hedge(
         "cvar": cvar,
         "hedge_fees": hedge_fees,
         "hedge_impact": hedge_impact,
+        "cost": cost,
     }
 
 
